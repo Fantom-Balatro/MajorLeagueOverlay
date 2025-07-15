@@ -1,0 +1,15 @@
+{
+	"id": "MajorLeagueOverlay",
+	"name": "Major League Overlay",
+	"display_name": "Major League Overlay",
+	"author": [
+		"Fantom"
+	],
+	"description": "A mod to send info to an overlay for Major League Balatro.",
+	"prefix": "MO",
+	"main_file": "Main.lua",
+	"priority": 0,
+	"version": "1.0.0",
+	"dependencies": [],
+	"conflicts": []
+}
