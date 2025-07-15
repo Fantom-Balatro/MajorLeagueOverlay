@@ -10,6 +10,6 @@
 	"main_file": "Main.lua",
 	"priority": 0,
 	"version": "1.0.0",
-	"dependencies": [],
+	"dependencies": ["Multiplayer (>=0.2.11)"],
 	"conflicts": []
 }
