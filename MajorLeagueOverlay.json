@@ -8,7 +8,7 @@
 	"description": "A mod to send info to an overlay for Major League Balatro.",
 	"prefix": "MO",
 	"main_file": "Main.lua",
-	"priority": 0,
+	"priority": 9007199254740991,
 	"version": "1.0.0",
 	"dependencies": ["Multiplayer (>=0.2.11)"],
 	"conflicts": []
