@@ -56,6 +56,7 @@ local start_run_ref = Game.start_run
 function Game:start_run(args)
 	if MP and MP.LOBBY then
 		MO.pvpScore = 0
+		MO.highScore = 0
 		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
 	end
 	return start_run_ref(self, args)
@@ -64,7 +65,10 @@ end
 local play_hand_ref = MP.ACTIONS.play_hand
 function MP.ACTIONS.play_hand(score, hands_left)
 	if score > 0 then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "play_hand", score = score - MO.pvpScore, hands_left = hands_left})
+		if (score - MO.pvpScore) > MO.highScore then
+			MO.highScore = (score - MO.pvpScore)
+			MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "high_score", score = MO.highScore})
+		end
 	end
 	MO.pvpScore = score
 	return play_hand_ref(score, hands_left)

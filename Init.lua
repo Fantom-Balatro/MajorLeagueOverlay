@@ -2,7 +2,8 @@ if not MO then MO = {} end
 
 MO = {
     serverUrl = "http://localhost:8080",
-    pvpScore = 0
+    pvpScore = 0,
+    highScore = 0
 }
 
 MO.UTILS = {
