@@ -10,7 +10,8 @@ end
 
 local reroll_shop_ref = G.FUNCS.reroll_shop
 function G.FUNCS.reroll_shop(e)
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "reroll_shop", cost = e.cost})
+	MO.rerolls = MO.rerolls + 1
+    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "reroll_shop", cost = e.cost, total_rerolls = MO.rerolls})
     return reroll_shop_ref(e)
 end
 
@@ -18,7 +19,7 @@ local buy_from_shop_ref = G.FUNCS.buy_from_shop
 function G.FUNCS.buy_from_shop(e)
 	local c1 = e.config.ref_table
 	if c1 and c1:is(Card) then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "bought_card", card = c1.config.center_key})
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "got_card", card = c1.config.center_key})
     end
     return buy_from_shop_ref(e)
 end
@@ -29,14 +30,21 @@ function G.FUNCS.use_card(e, mute, nosave)
 		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "bought_voucher",  new_voucher = e.config.ref_table.config.center_key, vouchers = MO.UTILS.get_vouchers()})
 	end
 	if e.config and e.config.ref_table and not e.config.ref_table.shop_voucher and e.config.ref_table.config and e.config.ref_table.config.center.atlas ~= "Booster" and e.config.ref_table.config.center_key then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "bought_card",  card = e.config.ref_table.config.center_key})
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "got_card",  card = e.config.ref_table.config.center_key})
 	end
 	return use_card_ref(e, mute, nosave)
 end
 
 local ease_dollars_ref = ease_dollars
 function ease_dollars(mod, instant)
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "money_moved", amount = mod})
+	if mod > 0 then
+		MO.earned = MO.earned + mod
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "money_earned", amount = mod, total = MO.earned})
+	end
+    if mod < 0 then
+		MO.spent = MO.spent - mod
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "money_spent", amount = mod * -1, total = MO.spent})
+	end
 	return ease_dollars_ref(mod, instant)
 end
 
@@ -57,6 +65,9 @@ function Game:start_run(args)
 	if MP and MP.LOBBY then
 		MO.pvpScore = 0
 		MO.highScore = 0
+		MO.rerolls = 0
+		MO.earned = 0
+		MO.spent = 0
 		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
 	end
 	return start_run_ref(self, args)
