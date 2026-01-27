@@ -95,12 +95,18 @@ end
 
 local blind_select_ref = Game.update_blind_select
 function Game:update_blind_select(dt)
-	MO.UTILS.check_deck()
+	if not G.STATE_COMPLETE then
+		MO.UTILS.check_deck()
+	end
 	return blind_select_ref(self, dt)
 end
 
 local update_play_tarot_ref = Game.update_play_tarot
 function Game:update_play_tarot(dt)
-	MO.UTILS.check_deck()
+	if self.buttons then
+		G.E_MANAGER:add_event(Event({trigger = 'after',delay = 0.4,func = function()
+            MO.UTILS.check_deck()
+        	return true end }))
+	end
 	return update_play_tarot_ref(self, dt)
 end

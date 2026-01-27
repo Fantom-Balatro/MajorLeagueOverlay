@@ -111,7 +111,52 @@ function MO.UTILS.check_deck()
     for _, card in ipairs(G.playing_cards) do
 		MO.UTILS.check_card(card)
 	end
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "deck_check", deck = deck_str}) 
+    sendDebugMessage("Deck Check:")
+    sendDebugMessage("Lucky: " .. MO.TEMP.numLucky)
+    sendDebugMessage("Glass: " .. MO.TEMP.numGlass)
+    sendDebugMessage("Gold: " .. MO.TEMP.numGold)
+    sendDebugMessage("Steel: " .. MO.TEMP.numSteel)
+    sendDebugMessage("Red Seals: " .. MO.TEMP.numRedSeal)
+    sendDebugMessage("Purple Seals: " .. MO.TEMP.numPurpleSeal)
+    sendDebugMessage("Blue Seals: " .. MO.TEMP.numBlueSeal)
+    sendDebugMessage("Gold Seals: " .. MO.TEMP.numGoldSeal)
+
+    local should_send_deck = false
+    if MO.TEMP.numLucky ~= MO.numLucky then
+        should_send_deck = true
+        MO.numLucky = MO.TEMP.numLucky
+    end
+    if MO.TEMP.numGlass ~= MO.numGlass then
+        should_send_deck = true
+        MO.numGlass = MO.TEMP.numGlass
+    end
+    if MO.TEMP.numGold ~= MO.numGold then
+        should_send_deck = true
+        MO.numGold = MO.TEMP.numGold
+    end
+    if MO.TEMP.numSteel ~= MO.numSteel then
+        should_send_deck = true
+        MO.numSteel = MO.TEMP.numSteel
+    end
+    if MO.TEMP.numRedSeal ~= MO.numRedSeal then
+        should_send_deck = true
+        MO.numRedSeal = MO.TEMP.numRedSeal
+    end
+    if MO.TEMP.numPurpleSeal ~= MO.numPurpleSeal then
+        should_send_deck = true
+        MO.numPurpleSeal = MO.TEMP.numPurpleSeal
+    end
+    if MO.TEMP.numBlueSeal ~= MO.numBlueSeal then
+        should_send_deck = true
+        MO.numBlueSeal = MO.TEMP.numBlueSeal
+    end
+    if MO.TEMP.numGoldSeal ~= MO.numGoldSeal then
+        should_send_deck = true
+        MO.numGoldSeal = MO.TEMP.numGoldSeal
+    end
+    if should_send_deck then
+        MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "deck_check", numLucky = MO.numLucky, numGlass = MO.numGlass, numGold = MO.numGold, numSteel = MO.numSteel, numRedSeal = MO.numRedSeal, numPurpleSeal = MO.numPurpleSeal, numBlueSeal = MO.numBlueSeal, numGoldSeal = MO.numGoldSeal})
+    end
     return true
 end
 
@@ -138,7 +183,24 @@ function MO.UTILS.check_card(card)
 	local seal = card.seal or "none"
 
 	local card_str = suit .. "-" .. rank .. "-" .. enhancement .. "-" .. edition .. "-" .. seal
-    printDebugMessage("Card checked: " .. card_str)
+    if enhancement == "m_gold" then
+        MO.TEMP.numGold = MO.TEMP.numGold + 1
+    elseif enhancement == "m_lucky" then
+        MO.TEMP.numLucky = MO.TEMP.numLucky + 1
+    elseif enhancement == "m_glass" then
+        MO.TEMP.numGlass = MO.TEMP.numGlass + 1
+    elseif enhancement == "m_steel" then
+        MO.TEMP.numSteel = MO.TEMP.numSteel + 1
+    end
+    if seal == "Red" then
+        MO.TEMP.numRedSeal = MO.TEMP.numRedSeal + 1
+    elseif seal == "Purple" then
+        MO.TEMP.numPurpleSeal = MO.TEMP.numPurpleSeal + 1
+    elseif seal == "Blue" then
+        MO.TEMP.numBlueSeal = MO.TEMP.numBlueSeal + 1
+    elseif seal == "Gold" then
+        MO.TEMP.numGoldSeal = MO.TEMP.numGoldSeal + 1  
+    end
     return true
 end
 
