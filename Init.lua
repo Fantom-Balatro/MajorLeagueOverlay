@@ -1,7 +1,7 @@
 if not MO then MO = {} end
 
 MO = {
-    serverUrl = "http://localhost:8080",
+    serverUrl = "https://icsw84ok4s0c0c84sk0ko0w0.andrii.es",
     pvpScore = 0,
     highScore = 0,
     rerolls = 0,
