@@ -68,6 +68,14 @@ function Game:start_run(args)
 		MO.rerolls = 0
 		MO.earned = 0
 		MO.spent = 0
+		MO.numLucky = 0
+		MO.numGlass = 0
+		MO.numGold = 0
+		MO.numSteel = 0
+		MO.numRedSeal = 0
+		MO.numPurpleSeal = 0
+		MO.numBlueSeal = 0
+		MO.numGoldSeal = 0
 		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
 	end
 	return start_run_ref(self, args)

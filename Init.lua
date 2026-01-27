@@ -6,7 +6,15 @@ MO = {
     highScore = 0,
     rerolls = 0,
     spent = 0,
-    earned = 0
+    earned = 0,
+    numLucky = 0,
+    numGlass = 0,
+    numGold = 0,
+    numSteel = 0,
+    numRedSeal = 0,
+    numPurpleSeal = 0,
+    numBlueSeal = 0,
+    numGoldSeal = 0
 }
 
 MO.UTILS = {
