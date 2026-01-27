@@ -1,7 +1,7 @@
 if not MO then MO = {} end
 
 MO = {
-    serverUrl = "https://icsw84ok4s0c0c84sk0ko0w0.andrii.es",
+    serverUrl = "https://localhost:8080",
     pvpScore = 0,
     highScore = 0,
     rerolls = 0,
@@ -21,7 +21,21 @@ MO.UTILS = {
     send_json = nil,
     send_json_event = nil,
     print_table_shallow = nil,
-    get_vouchers = nil
+    get_vouchers = nil,
+    deck_check = nil,
+    check_card = nil,
+    reset_temp = nil
+}
+
+MO.TEMP = {
+    numLucky = 0,
+    numGlass = 0,
+    numGold = 0,
+    numSteel = 0,
+    numRedSeal = 0,
+    numPurpleSeal = 0,
+    numBlueSeal = 0,
+    numGoldSeal = 0
 }
 
 -- Sends a Lua table as JSON to the given URL
@@ -90,4 +104,51 @@ function MO.UTILS.get_vouchers()
             voucher_keys = table.concat(keys, "-")
         end
     return voucher_keys
+end
+
+function MO.UTILS.check_deck()
+    MO.UTILS.reset_temp()
+    for _, card in ipairs(G.playing_cards) do
+		MO.UTILS.check_card(card)
+	end
+    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "deck_check", deck = deck_str}) 
+    return true
+end
+
+local reversed_centers = nil
+
+function MO.UTILS.check_card(card)
+    if not card or not card.base or not card.base.suit or not card.base.value then return "" end
+
+	if not reversed_centers then reversed_centers = MP.UTILS.reverse_key_value_pairs(G.P_CENTERS) end
+
+    local suit = string.sub(card.base.suit, 1, 1)
+
+	local rank_value_map = {
+		["10"] = "T",
+		Jack = "J",
+		Queen = "Q",
+		King = "K",
+		Ace = "A",
+	}
+	local rank = rank_value_map[card.base.value] or card.base.value
+
+	local enhancement = reversed_centers[card.config.center] or "none"
+	local edition = card.edition and MP.UTILS.reverse_key_value_pairs(card.edition, true)["true"] or "none"
+	local seal = card.seal or "none"
+
+	local card_str = suit .. "-" .. rank .. "-" .. enhancement .. "-" .. edition .. "-" .. seal
+    printDebugMessage("Card checked: " .. card_str)
+    return true
+end
+
+function MO.UTILS.reset_temp()
+    MO.TEMP.numLucky = 0
+    MO.TEMP.numGlass = 0
+    MO.TEMP.numGold = 0
+    MO.TEMP.numSteel = 0
+    MO.TEMP.numRedSeal = 0
+    MO.TEMP.numPurpleSeal = 0
+    MO.TEMP.numBlueSeal = 0
+    MO.TEMP.numGoldSeal = 0
 end

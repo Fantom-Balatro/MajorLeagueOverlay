@@ -92,3 +92,15 @@ function MP.ACTIONS.play_hand(score, hands_left)
 	MO.pvpScore = score
 	return play_hand_ref(score, hands_left)
 end
+
+local blind_select_ref = Game.update_blind_select
+function Game:update_blind_select(dt)
+	MO.UTILS.check_deck()
+	return blind_select_ref(self, dt)
+end
+
+local update_play_tarot_ref = Game.update_play_tarot
+function Game:update_play_tarot(dt)
+	MO.UTILS.check_deck()
+	return update_play_tarot_ref(self, dt)
+end
