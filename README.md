@@ -93,12 +93,36 @@ Sent when the player changes locations
 Locations include: 
 "loc_selecting" = blind select screen
 "loc_shop" = in a shop
-"loc_playing-`<blind>`" = playing a blind/boss/nemesis
+"loc_playing-bl_`<blind>`" = playing a blind/boss/nemesis (e.g. "loc_playing-bl_small")
 "loc_ready" = ready for PvP
 ### Format
 {user = `<username>`, action = "location_change", location = `<location>`}
 ### Example
 {user = "Fantom", action = "location_change", location = "loc_selecting"}
+
+## start_pvp
+### Info
+Sent when the player enters pvp
+### Format
+{user = `<username>`, action = "start_pvp"}
+### Example
+{user = "Fantom", action = "start_pvp"}
+
+## pvp_discards
+### Info
+Sent at start of PvP and whenever a discard is used in PvP
+### Format
+{user = `<username>`, action = "pvp_discards", count = `<discards_left>`}
+### Example
+{user = "Fantom", action = "pvp_discards", count = 2}
+
+## pvp_hands
+### Info
+Sent at start of PvP and whenever a hand is used in PvP
+### Format
+{user = `<username>`, action = "pvp_hands", count = `<hands_left>`}
+### Example
+{user = "Fantom", action = "pvp_hands", count = 3}
 
 ## deck_check
 Sent when selecting a blind or using a relevant consumable
@@ -108,3 +132,16 @@ Sends info about deck composition
 ### Example
 {user = "Fantom", action = "deck_check", numLucky = 10, numGlass = 0, numGold = 1, numSteel = 3, numRedSeal = 10, numPurpleSeal = 2, numBlueSeal = 1, numGoldSeal = 0}
 
+## full_deck
+Sent at start of PvP and whenever a hand/discard is used in PvP
+Syntax for a card is as follows:
+suit-rank-enhancement-edition-seal
+suit can be S,C,H,D
+rank can be A,2,3,4,5,6,7,8,9,T,J,Q,K
+enhancement is m_`<enhancement>` (c_base is no enhancement)
+edition is e_`<edition>`
+seal can be Red, Gold, Blue, Purple
+### Format
+{user = `<username>`, action = "deck_check", deck = `<deck_string>`}
+### Example
+{user = "Fantom", action = "full_deck", deck = ";S-A-c_base-none-none;S-K-c_base-none-none;S-Q-c_base-none-none;S-J-c_base-none-none;S-T-c_base-none-none;S-9-c_base-none-none;S-8-c_base-none-none;S-7-c_base-none-none;S-6-c_base-none-none;S-5-c_base-none-none;S-4-c_base-none-none;S-3-c_base-none-none;S-2-c_base-none-none;H-A-c_base-none-none;H-K-c_base-none-none;H-Q-c_base-none-none;H-J-c_base-none-none;H-T-c_base-none-none;H-9-c_base-none-none;H-8-c_base-none-none;H-7-c_base-none-none;H-6-c_base-none-none;H-5-c_base-none-none;H-4-c_base-none-none;H-3-c_base-none-none;H-2-c_base-none-none;C-A-c_base-none-none;C-K-c_base-none-none;C-Q-c_base-none-none;C-J-c_base-none-none;C-T-c_base-none-none;C-9-c_base-none-none;C-8-c_base-none-none;C-7-c_base-none-none;C-6-c_base-none-none;C-5-c_base-none-none;C-4-c_base-none-none;C-3-c_base-none-none;C-2-c_base-none-none;D-A-c_base-none-none;D-K-c_base-none-none;D-Q-c_base-none-none;D-J-c_base-none-none;D-T-c_base-none-none;D-9-c_base-none-none;D-8-c_base-none-none;D-7-c_base-none-none;D-6-c_base-none-none;D-5-c_base-none-none;D-4-c_base-none-none;D-3-c_base-none-none;D-2-c_base-none-none;D-4-c_base-none-Gold;S-8-m_gold-none-none"}

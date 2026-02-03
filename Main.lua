@@ -77,7 +77,8 @@ function Game:start_run(args)
 		MO.numBlueSeal = 0
 		MO.numGoldSeal = 0
 		MO.currScore = 0
-		MO.currPos = 1
+		MO.discards = 0
+		MO.hands = 0
 		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
 	end
 	return start_run_ref(self, args)
@@ -85,15 +86,24 @@ end
 
 local update_hand_played_ref = Game.update_hand_played
 function Game:update_hand_played(dt)
-	if G.STATE_COMPLETE then
-		if G.GAME.chips > MO.currScore then
-			local diff = G.GAME.chips - MO.currScore
-			MO.currScore = G.GAME.chips
-			if diff > MO.high_score then
-				MO.high_score = diff
-				MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "high_score", score = MO.high_score})
+	if not G.STATE_COMPLETE then
+		G.E_MANAGER:add_event(Event{
+			func = function()
+				if G.GAME.chips and G.GAME.chips > MO.currScore then
+				local diff = G.GAME.chips - MO.currScore
+				MO.currScore = G.GAME.chips
+				if diff > MO.highScore then
+					MO.highScore = diff
+					MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "high_score", score = MO.highScore})
+				end
 			end
-		end
+        	return true 
+		end,
+		blocking = false,
+		trigger = 'after',
+		delay = 0.5
+		})
+	end
 	return update_hand_played_ref(self, dt)
 end
 
@@ -131,6 +141,35 @@ local set_location_ref = MP.ACTIONS.set_location
 function MP.ACTIONS.set_location(location)
 	if MP.GAME.location ~= location then
 		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "location_change", location = location})
+		if location == "loc_playing-bl_mp_nemesis" then
+			MO.UTILS.start_pvp()
+		end
 	end
 	return set_location_ref(location)
+end
+
+local ease_discard_ref = Game.ease_discard
+function Game:ease_discard(mod, instant, silent)
+	if not MP.is_pvp_boss() then
+		return ease_discard_ref(self, mod, instant, silent)
+	end
+	if mod < 0 then
+		MO.discards = MO.discards + (-mod)
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "pvp_discards", count = MO.discards})
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
+	end
+	return ease_discard_ref(self, mod, instant, silent)
+end
+
+local ease_hands_played_ref = Game.ease_hands_played
+function Game:ease_hands_played(mod, instant, silent)
+	if not MP.is_pvp_boss() then
+		return ease_hands_played_ref(self, mod, instant, silent)
+	end
+	if mod > 0 then
+		MO.hands = MO.hands + mod
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "pvp_hands", count = MO.hands})
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
+	end
+	return ease_hands_played_ref(self, mod, instant, silent)
 end

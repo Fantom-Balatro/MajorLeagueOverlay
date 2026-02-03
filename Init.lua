@@ -16,7 +16,8 @@ MO = {
     numBlueSeal = 0,
     numGoldSeal = 0,
     currScore = 0,
-    currPos = 1
+    discards = 0,
+    hands = 0
 }
 
 MO.UTILS = {
@@ -27,7 +28,9 @@ MO.UTILS = {
     deck_check = nil,
     check_card = nil,
     reset_temp = nil,
-    check_deck_with_delay = nil
+    check_deck_with_delay = nil,
+    start_pvp = nil,
+    deck_string = nil
 }
 
 MO.TEMP = {
@@ -193,7 +196,7 @@ function MO.UTILS.check_card(card)
     elseif seal == "Blue" then
         MO.TEMP.numBlueSeal = MO.TEMP.numBlueSeal + 1
     elseif seal == "Gold" then
-        MO.TEMP.numGoldSeal = MO.TEMP.numGoldSeal + 1  
+        MO.TEMP.numGoldSeal = MO.TEMP.numGoldSeal + 1
     end
     return true
 end
@@ -210,6 +213,23 @@ function MO.UTILS.check_deck_with_delay()
 		})
 end
 
+function MO.UTILS.start_pvp()
+    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "start_pvp"})
+    MO.discards = G.GAME.current_round.discards_left or 0
+    MO.hands = G.GAME.current_round.hands_left or 0
+    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "pvp_discards", count = MO.discards})
+    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "pvp_hands", count = MO.hands})
+    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
+end
+
+function MO.UTILS.deck_string()
+    local deck_str = ""
+    for _, card in ipairs(G.playing_cards) do
+		deck_str = deck_str .. ";" .. MP.UTILS.card_to_string(card)
+	end
+    return deck_str
+end
+
 function MO.UTILS.reset_temp()
     MO.TEMP.numLucky = 0
     MO.TEMP.numGlass = 0
@@ -220,3 +240,4 @@ function MO.UTILS.reset_temp()
     MO.TEMP.numBlueSeal = 0
     MO.TEMP.numGoldSeal = 0
 end
+
