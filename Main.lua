@@ -27,10 +27,10 @@ end
 local use_card_ref = G.FUNCS.use_card
 function G.FUNCS.use_card(e, mute, nosave)
 	if e.config and e.config.ref_table and e.config.ref_table.shop_voucher and e.config.ref_table.config and e.config.ref_table.config.center_key then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "bought_voucher",  new_voucher = e.config.ref_table.config.center_key, vouchers = MO.UTILS.get_vouchers()})
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "bought_voucher", new_voucher = e.config.ref_table.config.center_key, vouchers = MO.UTILS.get_vouchers()})
 	end
 	if e.config and e.config.ref_table and not e.config.ref_table.shop_voucher and e.config.ref_table.config and e.config.ref_table.config.center.atlas ~= "Booster" and e.config.ref_table.config.center_key then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "got_card",  card = e.config.ref_table.config.center_key})
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "got_card", card = e.config.ref_table.config.center_key})
 	end
 	return use_card_ref(e, mute, nosave)
 end
@@ -76,10 +76,27 @@ function Game:start_run(args)
 		MO.numPurpleSeal = 0
 		MO.numBlueSeal = 0
 		MO.numGoldSeal = 0
+		MO.currScore = 0
+		MO.currPos = 1
 		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
 	end
 	return start_run_ref(self, args)
 end
+
+local update_hand_played_ref = Game.update_hand_played
+function Game:update_hand_played(dt)
+	if G.STATE_COMPLETE then
+		if G.GAME.chips > MO.currScore then
+			local diff = G.GAME.chips - MO.currScore
+			MO.currScore = G.GAME.chips
+			if diff > MO.high_score then
+				MO.high_score = diff
+				MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "high_score", score = MO.high_score})
+			end
+		end
+	return update_hand_played_ref(self, dt)
+end
+
 
 local play_hand_ref = MP.ACTIONS.play_hand
 function MP.ACTIONS.play_hand(score, hands_left)
@@ -96,6 +113,7 @@ end
 local blind_select_ref = Game.update_blind_select
 function Game:update_blind_select(dt)
 	if not G.STATE_COMPLETE then
+		MO.currScore = 0
 		MO.UTILS.check_deck()
 	end
 	return blind_select_ref(self, dt)
@@ -104,9 +122,15 @@ end
 local update_play_tarot_ref = Game.update_play_tarot
 function Game:update_play_tarot(dt)
 	if self.buttons then
-		G.E_MANAGER:add_event(Event({trigger = 'after',delay = 0.4,func = function()
-            MO.UTILS.check_deck()
-        	return true end }))
+		MO.UTILS.check_deck_with_delay()
 	end
 	return update_play_tarot_ref(self, dt)
+end
+
+local set_location_ref = MP.ACTIONS.set_location
+function MP.ACTIONS.set_location(location)
+	if MP.GAME.location ~= location then
+		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "location_change", location = location})
+	end
+	return set_location_ref(location)
 end

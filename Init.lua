@@ -1,7 +1,7 @@
 if not MO then MO = {} end
 
 MO = {
-    serverUrl = "https://localhost:8080",
+    serverUrl = "http://localhost:8080",
     pvpScore = 0,
     highScore = 0,
     rerolls = 0,
@@ -14,7 +14,9 @@ MO = {
     numRedSeal = 0,
     numPurpleSeal = 0,
     numBlueSeal = 0,
-    numGoldSeal = 0
+    numGoldSeal = 0,
+    currScore = 0,
+    currPos = 1
 }
 
 MO.UTILS = {
@@ -24,7 +26,8 @@ MO.UTILS = {
     get_vouchers = nil,
     deck_check = nil,
     check_card = nil,
-    reset_temp = nil
+    reset_temp = nil,
+    check_deck_with_delay = nil
 }
 
 MO.TEMP = {
@@ -111,15 +114,6 @@ function MO.UTILS.check_deck()
     for _, card in ipairs(G.playing_cards) do
 		MO.UTILS.check_card(card)
 	end
-    sendDebugMessage("Deck Check:")
-    sendDebugMessage("Lucky: " .. MO.TEMP.numLucky)
-    sendDebugMessage("Glass: " .. MO.TEMP.numGlass)
-    sendDebugMessage("Gold: " .. MO.TEMP.numGold)
-    sendDebugMessage("Steel: " .. MO.TEMP.numSteel)
-    sendDebugMessage("Red Seals: " .. MO.TEMP.numRedSeal)
-    sendDebugMessage("Purple Seals: " .. MO.TEMP.numPurpleSeal)
-    sendDebugMessage("Blue Seals: " .. MO.TEMP.numBlueSeal)
-    sendDebugMessage("Gold Seals: " .. MO.TEMP.numGoldSeal)
 
     local should_send_deck = false
     if MO.TEMP.numLucky ~= MO.numLucky then
@@ -202,6 +196,18 @@ function MO.UTILS.check_card(card)
         MO.TEMP.numGoldSeal = MO.TEMP.numGoldSeal + 1  
     end
     return true
+end
+
+function MO.UTILS.check_deck_with_delay()
+    G.E_MANAGER:add_event(Event{
+		func = function()
+            MO.UTILS.check_deck()
+        	return true 
+		end,
+		blocking = false,
+		trigger = 'after',
+		delay = 0.4
+		})
 end
 
 function MO.UTILS.reset_temp()
