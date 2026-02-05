@@ -79,7 +79,7 @@ function Game:start_run(args)
 		MO.currScore = 0
 		MO.discards = 0
 		MO.hands = 0
-		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), nemesis = MP.LOBBY.is_host and MP.LOBBY.guest.username or MP.LOBBY.host.username, action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), nemesis = MP.LOBBY.is_host and MP.LOBBY.guest.username or MP.LOBBY.host.username, stake = MP.LOBBY.deck.stake or MP.LOBBY.config.stake, deck = MP.LOBBY.deck.back or MP.LOBBY.config.back, action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
 	end
 	return start_run_ref(self, args)
 end
