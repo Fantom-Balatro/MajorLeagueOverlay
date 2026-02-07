@@ -238,6 +238,14 @@ function MO.UTILS.deck_string()
     return deck_str
 end
 
+function MO.UTILS.current_deck_string()
+    local deck_str = ""
+    for _, card in ipairs(G.deck.cards) do
+        deck_str = deck_str .. ";" .. MP.UTILS.card_to_string(card)
+    end
+    return deck_str
+end
+
 function MO.UTILS.reset_temp()
     MO.TEMP.numLucky = 0
     MO.TEMP.numGlass = 0
