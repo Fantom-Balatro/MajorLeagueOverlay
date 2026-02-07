@@ -110,6 +110,7 @@ end
 
 local play_hand_ref = MP.ACTIONS.play_hand
 function MP.ACTIONS.play_hand(score, hands_left)
+	MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_hands", score = score, count = hands_left})
 	if score > 0 then
 		if (score - MO.pvpScore) > MO.highScore then
 			MO.highScore = (score - MO.pvpScore)
@@ -159,17 +160,4 @@ function Game:ease_discard(mod, instant, silent)
 		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
 	end
 	return ease_discard_ref(self, mod, instant, silent)
-end
-
-local ease_hands_played_ref = Game.ease_hands_played
-function Game:ease_hands_played(mod, instant, silent)
-	if not MP.is_pvp_boss() then
-		return ease_hands_played_ref(self, mod, instant, silent)
-	end
-	if mod > 0 then
-		MO.hands = MO.hands + mod
-		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_hands", count = MO.hands})
-		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
-	end
-	return ease_hands_played_ref(self, mod, instant, silent)
 end

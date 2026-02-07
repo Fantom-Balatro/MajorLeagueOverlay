@@ -226,7 +226,7 @@ function MO.UTILS.start_pvp()
     MO.discards = G.GAME.current_round.discards_left or 0
     MO.hands = G.GAME.current_round.hands_left or 0
     MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_discards", count = MO.discards})
-    MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_hands", count = MO.hands})
+    MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_hands", score = 0, count = MO.hands})
     MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
 end
 
