@@ -10,10 +10,12 @@ Set the serverUrl in Init.lua to the URL of the server (Only sends http not http
 ### Info
 Sent at the start of every Balatro run (including a Multiplayer match)
 Also resets all internally stored variables (highest score, money earned, etc)
+Nemesis property will only be present in multiplayer matches
+Stake is numeric where "white stake" equals 1, adds +1 for each higehr stake chosen
 ### Format
-{ user = `<username>`, action = "game_start", starting_lives = `<starting_lives>` }
+{ user = `<username>`, nemesis = `<username_opponent>`, stake = `<chosen_stake>`, deck = `<chosen_deck>`, action = "game_start", starting_lives = `<starting_lives>` }
 ### Example
-{ user = "Fantom", action = "game_start", starting_lives = 4 }
+{ user = "Fantom", nemesis = "oathkeep", stake = 1, deck = "Red Deck", action = "game_start", starting_lives = 4 }
 
 ## ante_reached
 ### Info

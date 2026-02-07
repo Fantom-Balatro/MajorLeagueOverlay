@@ -1,7 +1,7 @@
 if not MO then MO = {} end
 
 MO = {
-    serverUrl = "http://localhost:8080",
+    serverUrls = { "http://localhost:8080", "http://localhost:8081" },
     pvpScore = 0,
     highScore = 0,
     rerolls = 0,
@@ -44,17 +44,23 @@ MO.TEMP = {
     numGoldSeal = 0
 }
 
--- Sends a Lua table as JSON to the given URL
-function MO.UTILS.send_json(url, data_table)
+-- Sends a Lua table as JSON to one or more URLs
+function MO.UTILS.send_json(urls, data_table)
     local json = require("json")
     local json_data = json.encode(data_table)
+
+    -- Normalize input: allow string or table
+    if type(urls) == "string" then
+        urls = { urls }
+    end
+
     local threadCode = [[
-    local url, json_data = ...
+        local url, json_data = ...
         local http = require("socket.http")
         local ltn12 = require("ltn12")
         local response_body = {}
 
-        local res, status_code, response_headers = http.request{
+        http.request{
             url = url,
             method = "POST",
             headers = {
@@ -65,9 +71,11 @@ function MO.UTILS.send_json(url, data_table)
             sink = ltn12.sink.table(response_body)
         }
     ]]
-    
-    local thread = love.thread.newThread(threadCode)
-    thread:start(url, json_data)
+
+    for _, url in ipairs(urls) do
+        local thread = love.thread.newThread(threadCode)
+        thread:start(url, json_data)
+    end
 end
 
 function MO.UTILS.send_json_event(url, data_table)
@@ -152,7 +160,7 @@ function MO.UTILS.check_deck()
         MO.numGoldSeal = MO.TEMP.numGoldSeal
     end
     if should_send_deck then
-        MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "deck_check", numLucky = MO.numLucky, numGlass = MO.numGlass, numGold = MO.numGold, numSteel = MO.numSteel, numRedSeal = MO.numRedSeal, numPurpleSeal = MO.numPurpleSeal, numBlueSeal = MO.numBlueSeal, numGoldSeal = MO.numGoldSeal})
+        MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "deck_check", numLucky = MO.numLucky, numGlass = MO.numGlass, numGold = MO.numGold, numSteel = MO.numSteel, numRedSeal = MO.numRedSeal, numPurpleSeal = MO.numPurpleSeal, numBlueSeal = MO.numBlueSeal, numGoldSeal = MO.numGoldSeal})
     end
     return true
 end
@@ -205,7 +213,7 @@ function MO.UTILS.check_deck_with_delay()
     G.E_MANAGER:add_event(Event{
 		func = function()
             MO.UTILS.check_deck()
-        	return true 
+        	return true
 		end,
 		blocking = false,
 		trigger = 'after',
@@ -214,12 +222,12 @@ function MO.UTILS.check_deck_with_delay()
 end
 
 function MO.UTILS.start_pvp()
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "start_pvp"})
+    MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "start_pvp"})
     MO.discards = G.GAME.current_round.discards_left or 0
     MO.hands = G.GAME.current_round.hands_left or 0
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "pvp_discards", count = MO.discards})
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "pvp_hands", count = MO.hands})
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
+    MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_discards", count = MO.discards})
+    MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_hands", count = MO.hands})
+    MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
 end
 
 function MO.UTILS.deck_string()
@@ -240,4 +248,3 @@ function MO.UTILS.reset_temp()
     MO.TEMP.numBlueSeal = 0
     MO.TEMP.numGoldSeal = 0
 end
-

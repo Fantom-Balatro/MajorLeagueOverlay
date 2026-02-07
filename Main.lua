@@ -11,7 +11,7 @@ end
 local reroll_shop_ref = G.FUNCS.reroll_shop
 function G.FUNCS.reroll_shop(e)
 	MO.rerolls = MO.rerolls + 1
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "reroll_shop", cost = e.cost, total_rerolls = MO.rerolls})
+    MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "reroll_shop", cost = e.cost, total_rerolls = MO.rerolls})
     return reroll_shop_ref(e)
 end
 
@@ -19,7 +19,7 @@ local buy_from_shop_ref = G.FUNCS.buy_from_shop
 function G.FUNCS.buy_from_shop(e)
 	local c1 = e.config.ref_table
 	if c1 and c1:is(Card) then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "got_card", card = c1.config.center_key})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "got_card", card = c1.config.center_key})
     end
     return buy_from_shop_ref(e)
 end
@@ -27,10 +27,10 @@ end
 local use_card_ref = G.FUNCS.use_card
 function G.FUNCS.use_card(e, mute, nosave)
 	if e.config and e.config.ref_table and e.config.ref_table.shop_voucher and e.config.ref_table.config and e.config.ref_table.config.center_key then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "bought_voucher", new_voucher = e.config.ref_table.config.center_key, vouchers = MO.UTILS.get_vouchers()})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "bought_voucher", new_voucher = e.config.ref_table.config.center_key, vouchers = MO.UTILS.get_vouchers()})
 	end
 	if e.config and e.config.ref_table and not e.config.ref_table.shop_voucher and e.config.ref_table.config and e.config.ref_table.config.center.atlas ~= "Booster" and e.config.ref_table.config.center_key then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "got_card", card = e.config.ref_table.config.center_key})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "got_card", card = e.config.ref_table.config.center_key})
 	end
 	return use_card_ref(e, mute, nosave)
 end
@@ -39,24 +39,24 @@ local ease_dollars_ref = ease_dollars
 function ease_dollars(mod, instant)
 	if mod > 0 then
 		MO.earned = MO.earned + mod
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "money_earned", amount = mod, total = MO.earned})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "money_earned", amount = mod, total = MO.earned})
 	end
     if mod < 0 then
 		MO.spent = MO.spent - mod
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "money_spent", amount = mod * -1, total = MO.spent})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "money_spent", amount = mod * -1, total = MO.spent})
 	end
 	return ease_dollars_ref(mod, instant)
 end
 
 local ease_ante_ref = ease_ante
 function ease_ante(mod, instant)
-    MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "ante_reached", amount = G.GAME.round_resets.ante + mod})
+    MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "ante_reached", amount = G.GAME.round_resets.ante + mod})
     return ease_ante_ref(mod, instant)
 end
 
 local ease_lives_ref = ease_lives
 function ease_lives(mod, instant)
-	MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "life_lost"})
+	MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "life_lost"})
 	return ease_lives_ref(mod, instant)
 end
 
@@ -79,7 +79,7 @@ function Game:start_run(args)
 		MO.currScore = 0
 		MO.discards = 0
 		MO.hands = 0
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), nemesis = MP.LOBBY.is_host and MP.LOBBY.guest.username or MP.LOBBY.host.username, stake = MP.LOBBY.deck.stake or MP.LOBBY.config.stake, deck = MP.LOBBY.deck.back or MP.LOBBY.config.back, action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
 	end
 	return start_run_ref(self, args)
 end
@@ -94,10 +94,10 @@ function Game:update_hand_played(dt)
 				MO.currScore = G.GAME.chips
 				if diff > MO.highScore then
 					MO.highScore = diff
-					MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "high_score", score = MO.highScore})
+					MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "high_score", score = MO.highScore})
 				end
 			end
-        	return true 
+        	return true
 		end,
 		blocking = false,
 		trigger = 'after',
@@ -113,7 +113,7 @@ function MP.ACTIONS.play_hand(score, hands_left)
 	if score > 0 then
 		if (score - MO.pvpScore) > MO.highScore then
 			MO.highScore = (score - MO.pvpScore)
-			MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "high_score", score = MO.highScore})
+			MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "high_score", score = MO.highScore})
 		end
 	end
 	MO.pvpScore = score
@@ -140,7 +140,7 @@ end
 local set_location_ref = MP.ACTIONS.set_location
 function MP.ACTIONS.set_location(location)
 	if MP.GAME.location ~= location then
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "location_change", location = location})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "location_change", location = location})
 		if location == "loc_playing-bl_mp_nemesis" then
 			MO.UTILS.start_pvp()
 		end
@@ -155,8 +155,8 @@ function Game:ease_discard(mod, instant, silent)
 	end
 	if mod < 0 then
 		MO.discards = MO.discards + (-mod)
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "pvp_discards", count = MO.discards})
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_discards", count = MO.discards})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
 	end
 	return ease_discard_ref(self, mod, instant, silent)
 end
@@ -168,8 +168,8 @@ function Game:ease_hands_played(mod, instant, silent)
 	end
 	if mod > 0 then
 		MO.hands = MO.hands + mod
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "pvp_hands", count = MO.hands})
-		MO.UTILS.send_json_event(MO.serverUrl, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_hands", count = MO.hands})
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
 	end
 	return ease_hands_played_ref(self, mod, instant, silent)
 end
