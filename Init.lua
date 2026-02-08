@@ -30,7 +30,10 @@ MO.UTILS = {
     reset_temp = nil,
     check_deck_with_delay = nil,
     start_pvp = nil,
-    deck_string = nil
+    deck_string = nil,
+    current_deck_string = nil,
+    current_hand_string = nil,
+    current_hand_string_with_delay = nil
 }
 
 MO.TEMP = {
@@ -228,6 +231,7 @@ function MO.UTILS.start_pvp()
     MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_discards", count = MO.discards})
     MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "pvp_hands", score = 0, count = MO.hands})
     MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "full_deck", deck = MO.UTILS.deck_string()})
+    MO.UTILS.current_hand_string_with_delay(8)
 end
 
 function MO.UTILS.deck_string()
@@ -244,6 +248,26 @@ function MO.UTILS.current_deck_string()
         deck_str = deck_str .. ";" .. MP.UTILS.card_to_string(card)
     end
     return deck_str
+end
+
+function MO.UTILS.current_hand_string()
+    local hand_str = ""
+    for _, card in ipairs(G.hand.cards) do
+        hand_str = hand_str .. ";" .. MP.UTILS.card_to_string(card)
+    end
+    return hand_str
+end
+
+function MO.UTILS.current_hand_string_with_delay(delay)
+    G.E_MANAGER:add_event(Event{
+        func = function()
+            MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "current_hand", hand = MO.UTILS.current_hand_string()})
+        	return true
+        end,
+        blocking = false,
+        trigger = 'after',
+        delay = delay or 3
+        })
 end
 
 function MO.UTILS.reset_temp()
