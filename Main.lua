@@ -50,6 +50,7 @@ end
 
 local ease_ante_ref = ease_ante
 function ease_ante(mod, instant)
+	MO.location = 0
     MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "ante_reached", amount = G.GAME.round_resets.ante + mod})
     return ease_ante_ref(mod, instant)
 end
@@ -79,6 +80,7 @@ function Game:start_run(args)
 		MO.currScore = 0
 		MO.discards = 0
 		MO.hands = 0
+		MO.location = 2
 		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), nemesis = MP.LOBBY.is_host and MP.LOBBY.guest.username or MP.LOBBY.host.username, stake = MP.LOBBY.deck.stake or MP.LOBBY.config.stake, deck = MP.LOBBY.deck.back or MP.LOBBY.config.back, action = "game_start", starting_lives = MP.LOBBY.config.starting_lives})
 	end
 	return start_run_ref(self, args)
@@ -143,7 +145,19 @@ end
 local set_location_ref = MP.ACTIONS.set_location
 function MP.ACTIONS.set_location(location)
 	if MP.GAME.location ~= location then
-		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "location_change", location = location})
+		if location ~= "loc_ready" then
+			if MO.location == 8 and location == "loc_playing-bl_mp_nemesis" then
+				MO.location = 9
+			else
+				if MO.location == 8 and G.GAME.round_resets.ante == 1 then
+					MO.location = 9
+				end
+				if MO.location < 8 then
+					MO.location = MO.location + 1
+				end
+			end
+		end
+		MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "location_change", location = MO.location})
 		if location == "loc_playing-bl_mp_nemesis" then
 			MO.UTILS.start_pvp()
 		end
@@ -160,4 +174,11 @@ function G.FUNCS.discard_cards_from_highlighted(e, hook)
 		MO.UTILS.current_hand_string_with_delay(3)
 	end
 	return discard_cards_from_highlighted_ref(e, hook)
+end
+
+local skip_ref = MP.ACTIONS.skip
+function MP.ACTIONS.skip(skips)
+	MO.location = MO.location + 3
+	MO.UTILS.send_json_event(MO.serverUrls, {user = MP.UTILS.get_username(), action = "location_change", location = MO.location})
+	return skip_ref(skips)
 end

@@ -17,7 +17,8 @@ MO = {
     numGoldSeal = 0,
     currScore = 0,
     discards = 0,
-    hands = 0
+    hands = 0,
+    location = 2
 }
 
 MO.UTILS = {
