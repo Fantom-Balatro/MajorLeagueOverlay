@@ -92,15 +92,11 @@ Does not use scientific notation. It simply sends the raw number
 ## location_change
 ### Info
 Sent when the player changes locations
-Locations include: 
-"loc_selecting" = blind select screen
-"loc_shop" = in a shop
-"loc_playing-bl_`<blind>`" = playing a blind/boss/nemesis (e.g. "loc_playing-bl_small")
-"loc_ready" = ready for PvP
+Locations: 1 = shop, 2 = selecting, 3 = small blind, 4 = shop, 5 = selecting, 6 = big blind, 7 = shop, 8 = selecting, 9 = boss/nemesis
 ### Format
 {user = `<username>`, action = "location_change", location = `<location>`}
 ### Example
-{user = "Fantom", action = "location_change", location = "loc_selecting"}
+{user = "Fantom", action = "location_change", location = 3}
 
 ## start_pvp
 ### Info
